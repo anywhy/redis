@@ -342,7 +342,9 @@ struct redisCommand redisCommandTable[] = {
 /*============================ Utility functions ============================ */
 
 /* Low level logging. To use only for very big messages, otherwise
- * serverLog() is to prefer. */
+ * serverLog() is to prefer.
+ * 低级level的日志处理，只能用于大消息，另外serverLog()优先
+ */
 void serverLogRaw(int level, const char *msg) {
     const int syslogLevelMap[] = { LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING };
     const char *c = ".-*#";
@@ -386,7 +388,10 @@ void serverLogRaw(int level, const char *msg) {
 
 /* Like serverLogRaw() but with printf-alike support. This is the function that
  * is used across the code. The raw version is only used in order to dump
- * the INFO output on crash. */
+ * the INFO output on crash.
+ *
+ * 和serverLogRaw()方法一样，但是支持printf方式，这个方法主要与代码中，老版本只是用于记录崩溃日志
+ */
 void serverLog(int level, const char *fmt, ...) {
     va_list ap;
     char msg[LOG_MAX_LEN];
@@ -428,7 +433,9 @@ err:
     if (!log_to_stdout) close(fd);
 }
 
-/* Return the UNIX time in microseconds */
+/* Return the UNIX time in microseconds
+ * 返回unix时间戳，1 秒 = 1 000 000 微秒
+ */
 long long ustime(void) {
     struct timeval tv;
     long long ust;
@@ -439,7 +446,9 @@ long long ustime(void) {
     return ust;
 }
 
-/* Return the UNIX time in milliseconds */
+/* Return the UNIX time in milliseconds
+ * 返回Unix时间，毫秒
+ */
 mstime_t mstime(void) {
     return ustime()/1000;
 }
@@ -460,7 +469,9 @@ void exitFromChild(int retcode) {
 
 /* This is a hash table type that uses the SDS dynamic strings library as
  * keys and redis objects as values (objects can hold SDS strings,
- * lists, sets). */
+ * lists, sets).
+ * Hash Table类型实现， sds字符串作为key, redis对象作为value（可以是sds字符串，lists, sets）
+ */
 
 void dictVanillaFree(void *privdata, void *val)
 {
@@ -574,6 +585,7 @@ uint64_t dictEncObjHash(const void *key) {
 
 /* Generic hash table type where keys are Redis Objects, Values
  * dummy pointers. */
+// 构造一个Hash表，key使用Redis对象，value使用NulL指针
 dictType objectKeyPointerValueDictType = {
     dictEncObjHash,            /* hash function */
     NULL,                      /* key dup */
@@ -584,6 +596,7 @@ dictType objectKeyPointerValueDictType = {
 };
 
 /* Set dictionary type. Keys are SDS strings, values are ot used. */
+// 构造一个Dict类型，KEY为sds字符串
 dictType setDictType = {
     dictSdsHash,               /* hash function */
     NULL,                      /* key dup */
@@ -745,8 +758,14 @@ void tryResizeHashTables(int dbid) {
  * table will use two tables for a long time. So we try to use 1 millisecond
  * of CPU time at every call of this function to perform some rehahsing.
  *
+ * 虽然服务器在对数据库执行读取/写入命令时会对数据库进行渐进式 rehash ，
+ * 但如果服务器长期没有执行命令的话，数据库字典的 rehash 就可能一直没办法完成，
+ * 为了防止出现这种情况，我们需要对数据库执行主动 rehash 。
+ *
  * The function returns 1 if some rehashing was performed, otherwise 0
- * is returned. */
+ * is returned.
+ * 函数在执行了主动 rehash 时返回 1 ，否则返回 0 。
+ */
 int incrementallyRehash(int dbid) {
     /* Keys dictionary */
     if (dictIsRehashing(server.db[dbid].dict)) {
