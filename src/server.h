@@ -1740,8 +1740,6 @@ int *zunionInterGetKeys(struct redisCommand *cmd,robj **argv, int argc, int *num
 int *evalGetKeys(struct redisCommand *cmd, robj **argv, int argc, int *numkeys);
 int *sortGetKeys(struct redisCommand *cmd, robj **argv, int argc, int *numkeys);
 int *migrateGetKeys(struct redisCommand *cmd, robj **argv, int argc, int *numkeys);
-int *migrateAsyncGetKeys(struct redisCommand *cmd, robj **argv, int argc, int *numkeys);
-int *restoreAsyncGetKeys(struct redisCommand *cmd, robj **argv, int argc, int *numkeys);
 
 /* Cluster */
 void clusterInit(void);
@@ -1988,6 +1986,7 @@ void migrateAsyncStatusCommand(client *c);
 void migrateAsyncCancelCommand(client *c);
 void restoreAsyncCommand(client *c);
 void restoreAsyncAuthCommand(client *c);
+void restoreAsyncSelectCommand(client *c);
 void restoreAsyncAckCommand(client *c);
 
 #if defined(__GNUC__)
